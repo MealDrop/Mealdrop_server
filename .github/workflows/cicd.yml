@@ -4,6 +4,8 @@ name: Node.js CI with Bun
 
 on:
   push:
+    branches: [ main, develop ]
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -21,11 +23,15 @@ jobs:
         with:
           bun-version: latest # Or specify a version like 1.2.0
 
-      # 3. Install your exact dependencies using Bun's lockfile
+      # 3. Install dependencies inside the server directory
+      # GitHub Actions runs each step in its own isolated shell instance. If you create a separate step just 
+      # to run cd server, the next step will completely forget that change and go back to the root folder. 
+      # Using working-directory explicitly tells GitHub to execute those exact commands inside your subfolder.
       - name: Install dependencies
+        working-directory: ./server
         run: bun ci
 
-      # 4. Run your application tests or build steps
+      # 4. Run tests inside the server directory
       - name: Run Tests
-        run: bun test  # Or 'bun run test' if using standard Node test runners
-
+        working-directory: ./server
+        run: bun test
